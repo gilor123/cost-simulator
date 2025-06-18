@@ -1374,7 +1374,7 @@ export function EnhancedTable({
           <tbody>
             {/* Totals row */}
             {costData && (
-              <tr className="border-b bg-gray-100 font-semibold">
+              <tr className="border-b bg-blue-50 font-semibold">
                 <td className="px-4 py-2">Total</td>
                 <td className="text-right px-2 py-2">{costData.totalCost}</td>
               </tr>

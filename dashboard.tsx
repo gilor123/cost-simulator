@@ -64,7 +64,6 @@ import { TableLoader } from "@/components/ui/table-loader"
 
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "database">("dashboard")
   const [selectedApps, setSelectedApps] = useState<string[]>(["Wolt iOS", "Wolt Android"])
   const [selectedLayers, setSelectedLayers] = useState<string[]>([])
   const [visibleLayer, setVisibleLayer] = useState<string | null>(null)
@@ -77,6 +76,8 @@ export default function Dashboard() {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false)
   const [selectedDateRange, setSelectedDateRange] = useState<string>("custom")
   const [isTableLoading, setIsTableLoading] = useState<boolean>(false)
+  const [appLevelCostView, setAppLevelCostView] = useState<boolean>(true)
+  const [appDateScope, setAppDateScope] = useState<boolean>(false)
 
 
 
@@ -521,7 +522,8 @@ export default function Dashboard() {
     dateTo,
     selectedApps,
     groupBy[0],
-    groupBySecondary
+    groupBySecondary,
+    appLevelCostView
   )
 
   // Trigger loading when filters change
@@ -580,103 +582,7 @@ export default function Dashboard() {
     clicks: databaseData.reduce((sum, row) => sum + row.clicks, 0),
   }
 
-  const DatabaseView = () => (
-    <div className="flex-1 overflow-auto p-4">
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-4 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">Campaign Database</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th 
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort("day")}
-                >
-                  <div className="flex items-center justify-between">
-                    Date
-                    <div className="flex flex-col">
-                      <ChevronUp className={`h-3 w-3 ${sortField === "day" && sortDirection === "asc" ? "text-gray-900" : "text-gray-400"}`} />
-                      <ChevronDown className={`h-3 w-3 ${sortField === "day" && sortDirection === "desc" ? "text-gray-900" : "text-gray-400"}`} />
-                    </div>
-                  </div>
-                </th>
-                <th 
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort("mediaSource")}
-                >
-                  <div className="flex items-center justify-between">
-                    Media source
-                    <div className="flex flex-col">
-                      <ChevronUp className={`h-3 w-3 ${sortField === "mediaSource" && sortDirection === "asc" ? "text-gray-900" : "text-gray-400"}`} />
-                      <ChevronDown className={`h-3 w-3 ${sortField === "mediaSource" && sortDirection === "desc" ? "text-gray-900" : "text-gray-400"}`} />
-                    </div>
-                  </div>
-                </th>
-                <th 
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort("campaign")}
-                >
-                  <div className="flex items-center justify-between">
-                    Campaign
-                    <div className="flex flex-col">
-                      <ChevronUp className={`h-3 w-3 ${sortField === "campaign" && sortDirection === "asc" ? "text-gray-900" : "text-gray-400"}`} />
-                      <ChevronDown className={`h-3 w-3 ${sortField === "campaign" && sortDirection === "desc" ? "text-gray-900" : "text-gray-400"}`} />
-                    </div>
-                  </div>
-                </th>
-                <th 
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort("cost")}
-                >
-                  <div className="flex items-center justify-between">
-                    Cost
-                    <div className="flex flex-col">
-                      <ChevronUp className={`h-3 w-3 ${sortField === "cost" && sortDirection === "asc" ? "text-gray-900" : "text-gray-400"}`} />
-                      <ChevronDown className={`h-3 w-3 ${sortField === "cost" && sortDirection === "desc" ? "text-gray-900" : "text-gray-400"}`} />
-                    </div>
-                  </div>
-                </th>
 
-                <th 
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort("apps")}
-                >
-                  <div className="flex items-center justify-between">
-                    Apps
-                    <div className="flex flex-col">
-                      <ChevronUp className={`h-3 w-3 ${sortField === "apps" && sortDirection === "asc" ? "text-gray-900" : "text-gray-400"}`} />
-                      <ChevronDown className={`h-3 w-3 ${sortField === "apps" && sortDirection === "desc" ? "text-gray-900" : "text-gray-400"}`} />
-                    </div>
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {databaseData.map((row, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm text-gray-900 border-r">{row.day}</td>
-                  <td className="px-4 py-3 text-sm text-gray-900 border-r">{row.mediaSource}</td>
-                  <td className="px-4 py-3 text-sm text-gray-900 border-r">{row.campaign}</td>
-                  <td className="px-4 py-3 text-sm text-gray-900 border-r">{row.cost}</td>
-                  <td className="px-4 py-3 text-sm text-gray-900">{row.apps}</td>
-                </tr>
-              ))}
-              {/* Total row */}
-              <tr className="bg-gray-100 font-medium">
-                <td className="px-4 py-3 text-sm text-gray-900 border-r font-semibold">Total</td>
-                <td className="px-4 py-3 text-sm text-gray-900 border-r"></td>
-                <td className="px-4 py-3 text-sm text-gray-900 border-r"></td>
-                <td className="px-4 py-3 text-sm text-gray-900 border-r font-semibold">{totals.cost}</td>
-                <td className="px-4 py-3 text-sm text-gray-900"></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  )
 
   return (
     <div className="flex h-screen bg-white font-sans text-[13px]">
@@ -694,14 +600,7 @@ export default function Dashboard() {
           <SidebarItem 
             icon="BarChart2" 
             text="Dashboard" 
-            active={activeTab === "dashboard"} 
-            onClick={() => setActiveTab("dashboard")}
-          />
-          <SidebarItem 
-            icon="Database" 
-            text="Database" 
-            active={activeTab === "database"}
-            onClick={() => setActiveTab("database")}
+            active={true}
           />
         </div>
 
@@ -714,29 +613,54 @@ export default function Dashboard() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Navigation */}
         <header className="h-[52px] border-b flex items-center justify-between px-4">
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="text-[#6c5fc7] text-[13px] font-normal h-8">
-              <Search className="h-4 w-4 mr-2" />
-              Ask AI
-            </Button>
-            <div className="h-5 border-r border-gray-300"></div>
-            <Button variant="ghost" size="sm" className="text-[13px] font-normal h-8">
-              <Settings className="h-4 w-4 mr-2" />
-              Integrations
-            </Button>
-            <Button variant="ghost" size="sm" className="text-[13px] font-normal h-8">
-              <User className="h-4 w-4 mr-2" />
-              CRM
-            </Button>
-            <Button variant="ghost" size="sm" className="text-[13px] font-normal h-8">
-              <div className="grid grid-cols-2 gap-0.5 mr-2">
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-sm"></div>
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-sm"></div>
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-sm"></div>
-                <div className="w-1.5 h-1.5 bg-gray-400 rounded-sm"></div>
-              </div>
-              My Apps
-            </Button>
+          <div className="flex items-center space-x-8">
+            {/* App-level cost view toggle */}
+            <div className="flex items-center space-x-2">
+              <label className="text-[13px] text-gray-700 font-medium">App-level cost view</label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs max-w-xs">Toggle between viewing total campaign cost or attributing cost to specific apps when possible.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={appLevelCostView}
+                  onChange={(e) => setAppLevelCostView(e.target.checked)}
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+
+            {/* Selective Date Scope toggle */}
+            <div className="flex items-center space-x-2">
+              <label className="text-[13px] text-gray-700 font-medium">Selective Date Scope</label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="w-4 h-4 text-gray-400 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs max-w-xs">Define whether cost should be attributed only on dates the selected apps were active, or across the full selected date range.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={appDateScope}
+                  onChange={(e) => setAppDateScope(e.target.checked)}
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -787,179 +711,275 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Conditional Content Based on Active Tab */}
-        {activeTab === "database" ? (
-          <DatabaseView />
-        ) : (
-          <>
-            {/* Filter Bar */}
-            <div className="border-b px-4 py-2 flex items-center text-[13px]">
-              <div className="flex items-center gap-4">
-                <AppSelector
-                  options={appOptions}
-                  selected={selectedApps}
-                  onChange={setSelectedApps}
-                  placeholder="Select apps..."
-                  className="w-[450px]"
-                />
+        {/* Dashboard Content */}
+        <>
+          {/* Filter Bar */}
+          <div className="border-b px-4 py-2 flex items-center text-[13px]">
+            <div className="flex items-center gap-4">
+              <AppSelector
+                options={appOptions}
+                selected={selectedApps}
+                onChange={setSelectedApps}
+                placeholder="Select apps..."
+                className="w-[450px]"
+              />
+
+              <div className="relative w-[300px]">
+                <Label htmlFor="attributionDates">Attribution dates</Label>
+                <DropdownMenu open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className="justify-between w-full text-left font-normal"
+                    >
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        {getDateRangeText()}
+                      </div>
+                      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-[800px] p-0" align="start">
+                    <DatePickerContent />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            <div className="ml-auto flex items-center space-x-2">
+              <Button variant="ghost" size="icon" className="h-6 w-6">
+                <Share className="h-3.5 w-3.5" />
+              </Button>
+              <Button variant="outline" size="icon" className="h-7 w-7 border-gray-300">
+                <Download className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
 
 
 
-
-
-
-                <div className="relative w-[300px]">
-                  <Label htmlFor="attributionDates">Attribution dates</Label>
-                  <DropdownMenu open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className="justify-between w-full text-left font-normal"
-                      >
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-2" />
-                          {getDateRangeText()}
-                        </div>
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-[800px] p-0" align="start">
-                      <DatePickerContent />
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+          {/* Main Content Area - Split Layout */}
+          <div className="flex-1 flex overflow-hidden">
+            {/* Left Half - Enhanced Table */}
+            <div className="w-1/2 flex flex-col border-r">
+              {/* Total Cost Card */}
+              <div className="px-4 py-4">
+                <div className="bg-white rounded-lg shadow border border-gray-200 p-6 max-w-xs">
+                  <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Cost</div>
+                  <div className="mt-2 text-3xl font-bold text-gray-900">${costEngineResult.totalCost}</div>
                 </div>
               </div>
 
-              <div className="ml-auto flex items-center space-x-2">
-                <Button variant="ghost" size="icon" className="h-6 w-6">
-                  <Share className="h-3.5 w-3.5" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-7 w-7 border-gray-300">
-                  <Download className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Total Cost Card */}
-            <div className="px-4 py-4">
-              <div className="bg-white rounded-lg shadow border border-gray-200 p-6 max-w-xs">
-                <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Cost</div>
-                <div className="mt-2 text-3xl font-bold text-gray-900">${costEngineResult.totalCost}</div>
-              </div>
-            </div>
-
-            {/* Group By Bar */}
-            <div className="border-b px-4 py-2 flex items-center text-[13px]">
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <Label htmlFor="groupBy">Group by</Label>
-                  <div className="flex items-center mt-1">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className="justify-between text-left font-normal"
-                        >
-                          {getGroupByLabel(groupBy[0])}
-                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        {groupByOptions
-                          .map((option) => (
-                            <DropdownMenuItem 
-                              key={option.value} 
-                              onClick={() => setGroupByPrimary(option.value)}
-                              className={`flex items-center ${option.value === groupBySecondary ? 'opacity-50 cursor-not-allowed' : ''}`}
-                              disabled={option.value === groupBySecondary}
-                            >
-                              <option.icon className="h-3.5 w-3.5 mr-2" />
-                              {option.label}
-                            </DropdownMenuItem>
-                          ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <div className="mx-2">
-                      <ArrowRight className="h-4 w-4 text-gray-500" />
+              {/* Group By Bar */}
+              <div className="border-b px-4 py-2 flex items-center text-[13px]">
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <Label htmlFor="groupBy">Group by</Label>
+                    <div className="flex items-center mt-1">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className="justify-between text-left font-normal"
+                          >
+                            {getGroupByLabel(groupBy[0])}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          {groupByOptions
+                            .map((option) => (
+                              <DropdownMenuItem 
+                                key={option.value} 
+                                onClick={() => setGroupByPrimary(option.value)}
+                                className={`flex items-center ${option.value === groupBySecondary ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                disabled={option.value === groupBySecondary}
+                              >
+                                <option.icon className="h-3.5 w-3.5 mr-2" />
+                                {option.label}
+                              </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      <div className="mx-2">
+                        <ArrowRight className="h-4 w-4 text-gray-500" />
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className="justify-between text-left font-normal"
+                          >
+                            {getGroupByLabel(groupBySecondary)}
+                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          {groupByOptions
+                            .map((option) => (
+                              <DropdownMenuItem 
+                                key={option.value} 
+                                onClick={() => setGroupBySecondary(option.value)}
+                                className={`flex items-center ${option.value === groupBy[0] ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                disabled={option.value === groupBy[0]}
+                              >
+                                <option.icon className="h-3.5 w-3.5 mr-2" />
+                                {option.label}
+                              </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className="justify-between text-left font-normal"
-                        >
-                          {getGroupByLabel(groupBySecondary)}
-                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        {groupByOptions
-                          .map((option) => (
-                            <DropdownMenuItem 
-                              key={option.value} 
-                              onClick={() => setGroupBySecondary(option.value)}
-                              className={`flex items-center ${option.value === groupBy[0] ? 'opacity-50 cursor-not-allowed' : ''}`}
-                              disabled={option.value === groupBy[0]}
-                            >
-                              <option.icon className="h-3.5 w-3.5 mr-2" />
-                              {option.label}
-                            </DropdownMenuItem>
-                          ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                  </div>
+                </div>
+
+                <div className="ml-auto flex items-center space-x-2">
+                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                    <span className="text-xs">⋮</span>
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-auto">
+                <TableLoader isLoading={isTableLoading}>
+                  {attributionType === "user_level" ? (
+                    <EnhancedTable
+                      groupBy={groupBy}
+                      groupBySecondary={groupBySecondary}
+                      selectedApps={selectedApps}
+                      selectedLayers={selectedLayers}
+                      visibleLayer={visibleLayer}
+                      costData={costEngineResult}
+                    />
+                  ) : (
+                    <DeviceLevelTable 
+                      groupBy={groupBy}
+                      groupBySecondary={groupBySecondary}
+                      selectedApps={selectedApps}
+                      selectedLayers={selectedLayers}
+                      visibleLayer={visibleLayer}
+                      selectedAsset={null}
+                    />
+                  )}
+                </TableLoader>
+              </div>
+
+              {/* Pagination */}
+              <div className="border-t p-2 flex justify-end space-x-2">
+                <Button variant="outline" size="sm" className="h-6 px-2 text-xs border-gray-300 font-normal">
+                  Top 25
+                </Button>
+                <Button variant="outline" size="sm" className="h-6 px-2 text-xs border-gray-300 font-normal">
+                  Top 50
+                </Button>
+                <Button variant="outline" size="sm" className="h-6 px-2 text-xs border-gray-300 font-normal">
+                  Top 100
+                </Button>
+              </div>
+            </div>
+
+            {/* Right Half - Database View */}
+            <div className="w-1/2 flex flex-col">
+              <div className="flex-1 overflow-auto p-2">
+                <div className="bg-white rounded-lg shadow">
+                  <div className="p-3 border-b">
+                    <h2 className="text-base font-semibold text-gray-900">Campaign Database</h2>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th 
+                            className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r cursor-pointer hover:bg-gray-100"
+                            onClick={() => handleSort("day")}
+                          >
+                            <div className="flex items-center justify-between">
+                              Date
+                              <div className="flex flex-col">
+                                <ChevronUp className={`h-3 w-3 ${sortField === "day" && sortDirection === "asc" ? "text-gray-900" : "text-gray-400"}`} />
+                                <ChevronDown className={`h-3 w-3 ${sortField === "day" && sortDirection === "desc" ? "text-gray-900" : "text-gray-400"}`} />
+                              </div>
+                            </div>
+                          </th>
+                          <th 
+                            className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r cursor-pointer hover:bg-gray-100"
+                            onClick={() => handleSort("mediaSource")}
+                          >
+                            <div className="flex items-center justify-between">
+                              Media source
+                              <div className="flex flex-col">
+                                <ChevronUp className={`h-3 w-3 ${sortField === "mediaSource" && sortDirection === "asc" ? "text-gray-900" : "text-gray-400"}`} />
+                                <ChevronDown className={`h-3 w-3 ${sortField === "mediaSource" && sortDirection === "desc" ? "text-gray-900" : "text-gray-400"}`} />
+                              </div>
+                            </div>
+                          </th>
+                          <th 
+                            className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r cursor-pointer hover:bg-gray-100"
+                            onClick={() => handleSort("campaign")}
+                          >
+                            <div className="flex items-center justify-between">
+                              Campaign
+                              <div className="flex flex-col">
+                                <ChevronUp className={`h-3 w-3 ${sortField === "campaign" && sortDirection === "asc" ? "text-gray-900" : "text-gray-400"}`} />
+                                <ChevronDown className={`h-3 w-3 ${sortField === "campaign" && sortDirection === "desc" ? "text-gray-900" : "text-gray-400"}`} />
+                              </div>
+                            </div>
+                          </th>
+                          <th 
+                            className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r cursor-pointer hover:bg-gray-100"
+                            onClick={() => handleSort("cost")}
+                          >
+                            <div className="flex items-center justify-between">
+                              Cost
+                              <div className="flex flex-col">
+                                <ChevronUp className={`h-3 w-3 ${sortField === "cost" && sortDirection === "asc" ? "text-gray-900" : "text-gray-400"}`} />
+                                <ChevronDown className={`h-3 w-3 ${sortField === "cost" && sortDirection === "desc" ? "text-gray-900" : "text-gray-400"}`} />
+                              </div>
+                            </div>
+                          </th>
+                          <th 
+                            className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                            onClick={() => handleSort("apps")}
+                          >
+                            <div className="flex items-center justify-between">
+                              Apps
+                              <div className="flex flex-col">
+                                <ChevronUp className={`h-3 w-3 ${sortField === "apps" && sortDirection === "asc" ? "text-gray-900" : "text-gray-400"}`} />
+                                <ChevronDown className={`h-3 w-3 ${sortField === "apps" && sortDirection === "desc" ? "text-gray-900" : "text-gray-400"}`} />
+                              </div>
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {databaseData.map((row, index) => (
+                          <tr key={index} className="hover:bg-gray-50">
+                            <td className="px-2 py-1.5 text-xs text-gray-900 border-r">{row.day}</td>
+                            <td className="px-2 py-1.5 text-xs text-gray-900 border-r">{row.mediaSource}</td>
+                            <td className="px-2 py-1.5 text-xs text-gray-900 border-r">{row.campaign}</td>
+                            <td className="px-2 py-1.5 text-xs text-gray-900 border-r">{row.cost}</td>
+                            <td className="px-2 py-1.5 text-xs text-gray-900">{row.apps}</td>
+                          </tr>
+                        ))}
+                        {/* Total row */}
+                        <tr className="bg-blue-50 font-medium">
+                          <td className="px-2 py-1.5 text-xs text-gray-900 border-r font-semibold">Total</td>
+                          <td className="px-2 py-1.5 text-xs text-gray-900 border-r"></td>
+                          <td className="px-2 py-1.5 text-xs text-gray-900 border-r"></td>
+                          <td className="px-2 py-1.5 text-xs text-gray-900 border-r font-semibold">{totals.cost}</td>
+                          <td className="px-2 py-1.5 text-xs text-gray-900"></td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
-
-              <div className="ml-auto flex items-center space-x-2">
-                <Button variant="ghost" size="icon" className="h-6 w-6">
-                  <span className="text-xs">⋮</span>
-                </Button>
-              </div>
             </div>
-
-            {/* Enhanced Table */}
-            <div className="flex-1 overflow-auto">
-              <TableLoader isLoading={isTableLoading}>
-                {attributionType === "user_level" ? (
-                  <EnhancedTable
-                    groupBy={groupBy}
-                    groupBySecondary={groupBySecondary}
-                    selectedApps={selectedApps}
-                    selectedLayers={selectedLayers}
-                    visibleLayer={visibleLayer}
-                    costData={costEngineResult}
-                  />
-                ) : (
-                  <DeviceLevelTable 
-                    groupBy={groupBy}
-                    groupBySecondary={groupBySecondary}
-                    selectedApps={selectedApps}
-                    selectedLayers={selectedLayers}
-                    visibleLayer={visibleLayer}
-                    selectedAsset={null}
-                  />
-                )}
-              </TableLoader>
-            </div>
-
-            {/* Pagination */}
-            <div className="border-t p-2 flex justify-end space-x-2">
-              <Button variant="outline" size="sm" className="h-6 px-2 text-xs border-gray-300 font-normal">
-                Top 25
-              </Button>
-              <Button variant="outline" size="sm" className="h-6 px-2 text-xs border-gray-300 font-normal">
-                Top 50
-              </Button>
-              <Button variant="outline" size="sm" className="h-6 px-2 text-xs border-gray-300 font-normal">
-                Top 100
-              </Button>
-            </div>
-          </>
-        )}
+          </div>
+        </>
       </div>
     </div>
   )

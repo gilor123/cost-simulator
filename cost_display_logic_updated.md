@@ -25,17 +25,20 @@
 
 ## 4. Breakdown view when "App" is in the grouping
 - **Show only selected apps**: Display only the apps that are selected in the app filter (not all possible apps)
-- **Campaign linked to a single app during the selected range**
-  - Show the campaign's full cost in that app's *Cost* column.
-- **Campaign linked to multiple apps during the selected range**
-  - Do not distribute the campaign's cost across app rows.
-  - Add one additional row titled **"Unknown"** containing the combined cost of all such multi-app campaigns.
+- **App-level cost view toggle behavior**:
+  - **When ON (default)**: Normal cost attribution logic applies
+    - Campaign linked to a single app: Show cost in that app's column
+    - Multi-app campaigns: Cost goes to "Unknown" row
+  - **When OFF**: Override logic applies
+    - All app rows show "NA" for cost (no cost attribution to apps)
+    - All campaign costs go to "Unknown" row (equals total cost)
 - **Selected apps with no matching campaigns**: Display "NA" in the *Cost* column instead of 0
 - **Secondary grouping by Campaign**: When secondary dimension is "Campaign"
   - Each app row is expandable to show all campaigns
-  - Campaign sub-rows show actual cost only for single-app campaigns
+  - **When app-level cost view ON**: Campaign sub-rows show actual cost only for single-app campaigns
+  - **When app-level cost view OFF**: All campaign sub-rows show "NA"
   - Multi-app campaigns show "NA" in app sub-rows (cost appears in "Unknown" row)
-- The **"Unknown"** row appears only when multi-app cost exists.
+- The **"Unknown"** row appears when multi-app cost exists OR when app-level cost view is OFF
 - **Totals row**: Display total cost below header and above data rows
 - The *Totals* row equals the sum of all displayed rows (apps + "Unknown"), excluding "NA" values.
 

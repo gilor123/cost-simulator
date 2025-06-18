@@ -102,7 +102,8 @@ export class CostEngine {
     dateFilteredRecords: DatabaseRecord[],
     selectedApps: string[],
     primaryGroupBy: string,
-    secondaryGroupBy?: string
+    secondaryGroupBy?: string,
+    appLevelCostView: boolean = true
   ): Record<string, TableRow> {
     // Early return if no apps selected - table should be empty
     if (selectedApps.length === 0) {
@@ -118,7 +119,7 @@ export class CostEngine {
     }
 
     if (primaryGroupBy === 'app') {
-      return this.generateAppGroupedRows(appFilteredRecords, selectedApps, secondaryGroupBy);
+      return this.generateAppGroupedRows(appFilteredRecords, selectedApps, secondaryGroupBy, appLevelCostView);
     } else {
       return this.generateDimensionGroupedRows(appFilteredRecords, primaryGroupBy, secondaryGroupBy);
     }
@@ -151,7 +152,8 @@ export class CostEngine {
   private generateAppGroupedRows(
     records: DatabaseRecord[],
     selectedApps: string[],
-    secondaryGroupBy?: string
+    secondaryGroupBy?: string,
+    appLevelCostView: boolean = true
   ): Record<string, TableRow> {
     const appRows: Record<string, TableRow> = {};
     const multiAppCampaigns = new Set<string>();
@@ -192,16 +194,23 @@ export class CostEngine {
     campaignToApps.forEach((apps, campaign) => {
       const cost = campaignCosts.get(campaign) || 0;
       
-      if (apps.size === 1) {
-        // Single app campaign
-        const app = Array.from(apps)[0];
-        if (appRows[app]) { // Only update if it's a valid app
-          appRows[app].cost += cost;
-        }
-      } else if (apps.size > 1) {
-        // Multi-app campaign
+      if (!appLevelCostView) {
+        // When app-level cost view is OFF, all costs go to Unknown
         multiAppCampaigns.add(campaign);
         unknownCost += cost;
+      } else {
+        // Normal logic when app-level cost view is ON
+        if (apps.size === 1) {
+          // Single app campaign
+          const app = Array.from(apps)[0];
+          if (appRows[app]) { // Only update if it's a valid app
+            appRows[app].cost += cost;
+          }
+        } else if (apps.size > 1) {
+          // Multi-app campaign
+          multiAppCampaigns.add(campaign);
+          unknownCost += cost;
+        }
       }
     });
 
@@ -209,7 +218,7 @@ export class CostEngine {
     if (secondaryGroupBy === 'campaign') {
       selectedApps.forEach(app => {
         if (appRows[app]) {
-          this.addAllCampaignsToApp(appRows[app], records, app, campaignToApps, campaignCosts);
+          this.addAllCampaignsToApp(appRows[app], records, app, campaignToApps, campaignCosts, appLevelCostView);
         }
       });
     }
@@ -291,7 +300,8 @@ export class CostEngine {
     records: DatabaseRecord[],
     appName: string,
     campaignToApps: Map<string, Set<string>>,
-    campaignCosts: Map<string, number>
+    campaignCosts: Map<string, number>,
+    appLevelCostView: boolean = true
   ): void {
     if (!appRow.subRows) {
       appRow.subRows = {};
@@ -309,11 +319,15 @@ export class CostEngine {
       
       // Determine cost for this campaign-app combination
       let campaignCost = 0;
-      if (campaignApps.size === 1 && campaignApps.has(appName)) {
-        // Single-app campaign that matches this app
-        campaignCost = campaignCosts.get(campaign) || 0;
+      if (appLevelCostView) {
+        // Normal logic when app-level cost view is ON
+        if (campaignApps.size === 1 && campaignApps.has(appName)) {
+          // Single-app campaign that matches this app
+          campaignCost = campaignCosts.get(campaign) || 0;
+        }
+        // For multi-app campaigns, cost stays 0 (will show in Unknown)
       }
-      // For multi-app campaigns, cost stays 0 (will show in Unknown)
+      // When appLevelCostView is false, all campaign costs stay 0 (will show as "NA")
 
       appRow.subRows![campaign] = {
         key: campaign,
@@ -329,7 +343,8 @@ export class CostEngine {
     dateTo: Date | null,
     selectedApps: string[],
     primaryGroupBy: string,
-    secondaryGroupBy?: string
+    secondaryGroupBy?: string,
+    appLevelCostView: boolean = true
   ): CostEngineResult {
     // Step 1: Filter by attribution date range
     const dateFilteredRecords = this.filterByDateRange(dateFrom, dateTo);
@@ -342,7 +357,8 @@ export class CostEngine {
       dateFilteredRecords,
       selectedApps,
       primaryGroupBy,
-      secondaryGroupBy
+      secondaryGroupBy,
+      appLevelCostView
     );
 
     // Create totals row
@@ -402,8 +418,9 @@ export function processCostData(
   dateTo: Date | null,
   selectedApps: string[],
   primaryGroupBy: string,
-  secondaryGroupBy?: string
+  secondaryGroupBy?: string,
+  appLevelCostView: boolean = true
 ): CostEngineResult {
   const engine = new CostEngine(rawData);
-  return engine.processData(dateFrom, dateTo, selectedApps, primaryGroupBy, secondaryGroupBy);
+  return engine.processData(dateFrom, dateTo, selectedApps, primaryGroupBy, secondaryGroupBy, appLevelCostView);
 } 
